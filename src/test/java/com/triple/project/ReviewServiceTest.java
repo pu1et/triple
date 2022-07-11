@@ -10,13 +10,14 @@ import com.triple.project.service.MemberService;
 import com.triple.project.service.PlaceService;
 import com.triple.project.service.ReviewService;
 import lombok.Getter;
-import lombok.Setter;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -30,24 +31,28 @@ public class ReviewServiceTest {
 	private MemberService memberService;
 	@Autowired
 	private PlaceService placeService;
+	TestReviewDTO testReviewDTO;
 
+	@BeforeEach
+	void beforeEach() {
+		testReviewDTO = new TestReviewDTO();
+		Member member = memberService.saveMember(new MemberDTO(testReviewDTO.memberId));
+		Place place = placeService.savePlace(new PlaceDTO(testReviewDTO.placeId));
+	}
+
+	@Transactional
 	@DisplayName("리뷰를 작성한다.")
 	@Test
 	void createReview() {
-		TestReviewDTO testReviewDTO = new TestReviewDTO();
-		Member member = memberService.saveMember(new MemberDTO(testReviewDTO.memberId));
-		Place place = placeService.savePlace(new PlaceDTO(testReviewDTO.placeId));
 		ReviewDTO.CreateRequest reviewDTO = testReviewDTO.getCreateReviewDTO();
 		Review review = reviewService.createReview(testReviewDTO.getCreateReviewDTO());
 		Assertions.assertTrue(reviewDTO.isEqualReview(review));
 	}
 
+	@Transactional
 	@DisplayName("리뷰를 수정한다.")
 	@Test
 	void updateReview() {
-		TestReviewDTO testReviewDTO = new TestReviewDTO();
-		Member member = memberService.saveMember(new MemberDTO(testReviewDTO.memberId));
-		Place place = placeService.savePlace(new PlaceDTO(testReviewDTO.placeId));
 		Review review = reviewService.createReview(testReviewDTO.getCreateReviewDTO());
 		final String updateContent = "싫어요!";
 		final List<String> updateAttachedPhotoIds = new ArrayList<>();
@@ -59,6 +64,19 @@ public class ReviewServiceTest {
 		Review updateReview = reviewService.updateReview(testReviewDTO.reviewId, reviewDTO);
 
 		Assertions.assertTrue(reviewDTO.isEqualReview(updateReview));
+	}
+
+	@Transactional
+	@DisplayName("리뷰를 삭제한다.")
+	@Test
+	void deleteReview() {
+		Review createdReview = reviewService.createReview(testReviewDTO.getCreateReviewDTO());
+
+		reviewService.deleteReview(testReviewDTO.reviewId);
+
+		Assertions.assertThrows(IllegalStateException.class, () -> {
+			reviewService.findReview(testReviewDTO.reviewId);
+		});
 	}
 
 	@Getter
