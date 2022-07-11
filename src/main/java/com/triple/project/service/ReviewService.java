@@ -30,6 +30,7 @@ public class ReviewService {
 		return reviewRepository.save(review);
 	}
 
+	@Transactional
 	public Review updateReview(String reviewId, ReviewDTO.UpdateRequest reviewDTO) {
 		Review review = findReview(reviewId);
 		review.updateReview(reviewDTO.getContent(), PhotoDTO.toPhotos(reviewDTO.getAttachedPhotoIds()));
@@ -41,5 +42,10 @@ public class ReviewService {
 				.orElseThrow(() -> {
 					throw new IllegalStateException("리뷰가 존재하지 않습니다.");
 				});
+	}
+
+	@Transactional
+	public void deleteReview(String reviewId) {
+		reviewRepository.deleteById(reviewId);
 	}
 }
