@@ -26,6 +26,9 @@ public class ReviewService {
 	public Review createReview(ReviewDTO.CreateRequest reviewDTO) {
 		Member member = memberService.findMember(reviewDTO.getMemberId());
 		Place place = placeService.findPlace(reviewDTO.getPlaceId());
+		reviewRepository.findByMemberAndPlace(member, place).ifPresent((review) -> {
+				throw new IllegalStateException("해당 장소에 대한 사용자의 리뷰가 존재합니다.");
+		});
 		Review review = reviewDTO.toReview(member, place);
 		return reviewRepository.save(review);
 	}
