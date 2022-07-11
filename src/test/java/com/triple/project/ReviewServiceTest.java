@@ -4,6 +4,7 @@ import com.triple.project.domain.Member;
 import com.triple.project.domain.Place;
 import com.triple.project.domain.Review;
 import com.triple.project.dto.MemberDTO;
+import com.triple.project.dto.PhotoDTO;
 import com.triple.project.dto.PlaceDTO;
 import com.triple.project.dto.ReviewDTO;
 import com.triple.project.service.MemberService;
@@ -22,6 +23,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 
+@Transactional
 @ActiveProfiles("test")
 @SpringBootTest
 public class ReviewServiceTest {
@@ -40,7 +42,6 @@ public class ReviewServiceTest {
 		Place place = placeService.savePlace(new PlaceDTO(testReviewDTO.placeId));
 	}
 
-	@Transactional
 	@DisplayName("리뷰를 작성한다.")
 	@Test
 	void createReview() {
@@ -49,7 +50,6 @@ public class ReviewServiceTest {
 		Assertions.assertTrue(reviewDTO.isEqualReview(review));
 	}
 
-	@Transactional
 	@DisplayName("리뷰를 수정한다.")
 	@Test
 	void updateReview() {
@@ -66,7 +66,6 @@ public class ReviewServiceTest {
 		Assertions.assertTrue(reviewDTO.isEqualReview(updateReview));
 	}
 
-	@Transactional
 	@DisplayName("리뷰를 삭제한다.")
 	@Test
 	void deleteReview() {
@@ -79,7 +78,6 @@ public class ReviewServiceTest {
 		});
 	}
 
-	@Transactional
 	@DisplayName("한 사용자는 장소마다 한 리뷰만 작성할 수 있다.")
 	@Test
 	void onePlaceOneReview() {
@@ -88,6 +86,28 @@ public class ReviewServiceTest {
 		Assertions.assertThrows(IllegalStateException.class, () -> {
 			reviewService.createReview(testReviewDTO.getCreateReviewDTO());
 		});
+	}
+
+	@DisplayName("보상 점수 중 내용 점수는 1자 이상 텍스트 작성시 1점, 1장 이상 사진 첨부시 1점이다.")
+	@Test
+	void getContentScore() {
+		testReviewDTO.setContent("");
+		testReviewDTO.setAttachedPhotoIds(new ArrayList<>());
+		int reviewWithZeroLengthAndZeroPhoto = reviewService.calculatePoint(testReviewDTO.content, PhotoDTO.toPhotos(testReviewDTO.attachedPhotoIds));
+		testReviewDTO.setContent("글");
+		int reviewWithOneLengthAndZeroPhoto = reviewService.calculatePoint(testReviewDTO.content, PhotoDTO.toPhotos(testReviewDTO.attachedPhotoIds));
+		testReviewDTO.setContent("");
+		final List<String> updateAttachedPhotoIds = new ArrayList<>();
+		updateAttachedPhotoIds.add("e4d1a64e-a531-46de-88d0-ff0ed70c0bb8");
+		testReviewDTO.setAttachedPhotoIds(updateAttachedPhotoIds);
+		int reviewWithZeroLengthAndOnePhoto = reviewService.calculatePoint(testReviewDTO.content, PhotoDTO.toPhotos(testReviewDTO.attachedPhotoIds));
+		testReviewDTO.setContent("글");
+		int reviewWithOneLengthAndOnePhoto = reviewService.calculatePoint(testReviewDTO.content, PhotoDTO.toPhotos(testReviewDTO.attachedPhotoIds));
+
+		Assertions.assertEquals(reviewWithZeroLengthAndZeroPhoto, 0);
+		Assertions.assertEquals(reviewWithOneLengthAndZeroPhoto, 1);
+		Assertions.assertEquals(reviewWithZeroLengthAndOnePhoto, 1);
+		Assertions.assertEquals(reviewWithOneLengthAndOnePhoto, 2);
 	}
 
 	@Getter
@@ -119,6 +139,10 @@ public class ReviewServiceTest {
 					.attachedPhotoIds(attachedPhotoIds)
 					.memberId(memberId)
 					.placeId(placeId).build();
+		}
+
+		public ReviewDTO.UpdateRequest getUpdateReviewDTO() {
+			return new ReviewDTO.UpdateRequest(content, attachedPhotoIds);
 		}
 	}
 }
