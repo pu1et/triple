@@ -3,6 +3,7 @@ package com.triple.project.service;
 import com.triple.project.domain.Member;
 import com.triple.project.domain.Place;
 import com.triple.project.domain.Review;
+import com.triple.project.dto.PhotoDTO;
 import com.triple.project.dto.ReviewDTO;
 import com.triple.project.repository.ReviewRepository;
 import org.springframework.stereotype.Service;
@@ -22,10 +23,23 @@ public class ReviewService {
 	}
 
 	@Transactional
-	public Review createReview(ReviewDTO reviewDTO) {
+	public Review createReview(ReviewDTO.CreateRequest reviewDTO) {
 		Member member = memberService.findMember(reviewDTO.getMemberId());
 		Place place = placeService.findPlace(reviewDTO.getPlaceId());
 		Review review = reviewDTO.toReview(member, place);
 		return reviewRepository.save(review);
+	}
+
+	public Review updateReview(String reviewId, ReviewDTO.UpdateRequest reviewDTO) {
+		Review review = findReview(reviewId);
+		review.updateReview(reviewDTO.getContent(), PhotoDTO.toPhotos(reviewDTO.getAttachedPhotoIds()));
+		return reviewRepository.save(review);
+	}
+
+	public Review findReview(String reviewId) {
+		return reviewRepository.findById(reviewId)
+				.orElseThrow(() -> {
+					throw new IllegalStateException("리뷰가 존재하지 않습니다.");
+				});
 	}
 }

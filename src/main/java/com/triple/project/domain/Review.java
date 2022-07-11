@@ -30,4 +30,10 @@ public class Review extends BaseEntity {
 		attachedPhotoIds.add(photo);
 		photo.setReview(this);
 	}
+
+	public void updateReview(String content, List<Photo> attachedPhotoIds) {
+		this.content = content;
+		this.attachedPhotoIds = new ArrayList<>();
+		attachedPhotoIds.forEach(this::addPhoto);
+	}
 }

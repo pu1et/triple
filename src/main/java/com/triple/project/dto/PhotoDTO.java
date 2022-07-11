@@ -11,6 +11,14 @@ import java.util.*;
 public class PhotoDTO {
 	private String photoId;
 
+	public static List<Photo> toPhotos(List<String> photoIds) {
+		List<Photo> photos = new ArrayList<>();
+		photoIds.forEach(photoId -> {
+			photos.add(new Photo(photoId));
+		});
+		return photos;
+	}
+
 	public static boolean isEqualPhotos(List<String> photos1, List<Photo> photos2) {
 		List<String> photos2Ids = new ArrayList<>();
 		photos2.forEach(photo2 -> {
