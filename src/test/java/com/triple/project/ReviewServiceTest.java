@@ -79,6 +79,17 @@ public class ReviewServiceTest {
 		});
 	}
 
+	@Transactional
+	@DisplayName("한 사용자는 장소마다 한 리뷰만 작성할 수 있다.")
+	@Test
+	void onePlaceOneReview() {
+		Review firstReview = reviewService.createReview(testReviewDTO.getCreateReviewDTO());
+
+		Assertions.assertThrows(IllegalStateException.class, () -> {
+			reviewService.createReview(testReviewDTO.getCreateReviewDTO());
+		});
+	}
+
 	@Getter
 	static class TestReviewDTO {
 		private final String reviewId = "240a0658-dc5f-4878-9381-ebb7b2667772";
