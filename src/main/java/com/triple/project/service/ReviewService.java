@@ -1,6 +1,7 @@
 package com.triple.project.service;
 
 import com.triple.project.domain.Member;
+import com.triple.project.domain.Photo;
 import com.triple.project.domain.Place;
 import com.triple.project.domain.Review;
 import com.triple.project.dto.PhotoDTO;
@@ -8,6 +9,8 @@ import com.triple.project.dto.ReviewDTO;
 import com.triple.project.repository.ReviewRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
 
 @Transactional(readOnly = true)
 @Service
@@ -30,7 +33,9 @@ public class ReviewService {
 				throw new IllegalStateException("해당 장소에 대한 사용자의 리뷰가 존재합니다.");
 		});
 		Review review = reviewDTO.toReview(member, place);
-		return reviewRepository.save(review);
+		Review savedReview = reviewRepository.save(review);
+		Member updateMember = memberService.updatePoint(member, calculatePoint(savedReview.getContent(), savedReview.getAttachedPhotoIds()));
+		return savedReview;
 	}
 
 	@Transactional
@@ -50,5 +55,16 @@ public class ReviewService {
 	@Transactional
 	public void deleteReview(String reviewId) {
 		reviewRepository.deleteById(reviewId);
+	}
+
+	public int calculatePoint(String content, List<Photo> photos) {
+		int point = 0;
+		if (content.length() > 0) {
+			++point;
+		}
+		if (photos.size() > 0) {
+			++point;
+		}
+		return point;
 	}
 }

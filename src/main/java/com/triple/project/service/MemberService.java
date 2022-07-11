@@ -26,4 +26,10 @@ public class MemberService {
 	public Member saveMember(MemberDTO memberDTO) {
 		return memberRepository.save(memberDTO.toMember());
 	}
+
+	@Transactional
+	public Member updatePoint(Member member, int calculatePoint) {
+		member.updatePoint(calculatePoint);
+		return memberRepository.save(member);
+	}
 }
