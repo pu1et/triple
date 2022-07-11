@@ -34,7 +34,7 @@ public class ReviewService {
 		});
 		Review review = reviewDTO.toReview(member, place);
 		Review savedReview = reviewRepository.save(review);
-		Member updateMember = memberService.updatePoint(member, calculatePoint(savedReview.getContent(), savedReview.getAttachedPhotoIds()));
+		Member updateMember = memberService.updatePoint(member, calculateAllPoint(savedReview));
 		return savedReview;
 	}
 
@@ -57,14 +57,20 @@ public class ReviewService {
 		reviewRepository.deleteById(reviewId);
 	}
 
+	public int calculateAllPoint(Review review) {
+		return calculateBonusPoint(review)
+				+ calculatePoint(review.getContent(), review.getAttachedPhotoIds());
+	}
+
+	public int calculateBonusPoint(Review review) {
+		List<Review> allReview = reviewRepository.findAllByPlace(review.getPlace());
+		return (allReview.size() == 1 && allReview.get(0).getMember().equals(review.getMember())) ? 1 : 0;
+	}
+
 	public int calculatePoint(String content, List<Photo> photos) {
 		int point = 0;
-		if (content.length() > 0) {
-			++point;
-		}
-		if (photos.size() > 0) {
-			++point;
-		}
+		if (content.length() > 0) ++point;
+		if (photos.size() > 0) ++point;
 		return point;
 	}
 }

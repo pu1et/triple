@@ -1,10 +1,12 @@
 package com.triple.project.domain;
 
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import javax.persistence.Entity;
 
+@EqualsAndHashCode(callSuper = false)
 @NoArgsConstructor
 @Getter
 @Entity
