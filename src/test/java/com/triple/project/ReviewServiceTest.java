@@ -163,6 +163,19 @@ public class ReviewServiceTest {
 		assertEquals(pointOfOnePhoto, pointOfEmptyPhoto + 1);
 	}
 
+	@DisplayName("글과 사진이 있는 리뷰에서 사진을 모두 삭제하면 1점을 회수한다.")
+	@Test
+	void deleteScoreIfDeleteAllPhotos() {
+		Review firstReview = reviewService.createReview(testReviewDTO.getCreateReviewDTO());
+
+		int pointOfNotEmptyPhoto = firstReview.getPoint();
+		testReviewDTO.attachedPhotoIds.clear();
+		Review review = reviewService.updateReview(testReviewDTO.reviewId, testReviewDTO.getUpdateReviewDTO());
+		int pointOfEmptyPhoto = reviewService.findReview(testReviewDTO.reviewId).getPoint();
+
+		assertEquals(pointOfEmptyPhoto, pointOfNotEmptyPhoto - 1);
+	}
+
 	@Getter
 	static class TestReviewDTO {
 		private String reviewId = "240a0658-dc5f-4878-9381-ebb7b2667772";
