@@ -11,17 +11,12 @@ import com.triple.project.service.MemberService;
 import com.triple.project.service.PlaceService;
 import com.triple.project.service.PointService;
 import com.triple.project.service.ReviewService;
-import lombok.AccessLevel;
-import lombok.Getter;
-import org.assertj.core.api.Assertions;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
@@ -144,9 +139,9 @@ public class ReviewServiceTest {
 	void deleteScoreIfDeleteReview() {
 		Review firstReview = reviewService.createReview(testReviewDTO.getCreateReviewDTO());
 
-		int pointBeforeDeletedReview = pointService.getUserPoint(testReviewDTO.memberId);
+		int pointBeforeDeletedReview = pointService.getMemberPoint(testReviewDTO.memberId);
 		reviewService.deleteReview(testReviewDTO.reviewId);
-		int pointAfterDeletedReview = pointService.getUserPoint(testReviewDTO.memberId);
+		int pointAfterDeletedReview = pointService.getMemberPoint(testReviewDTO.memberId);
 
 		assertEquals(pointAfterDeletedReview, pointBeforeDeletedReview - 3);
 	}

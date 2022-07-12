@@ -52,4 +52,16 @@ public class PointServiceTest {
 
 		assertEquals(allPoints.size(), 2);
 	}
+
+	@DisplayName("사용자 마다 현재 시점의 포인트 총점을 조회하거나 계산할 수 있어야 한다.")
+	@Test
+	void getUserPoint() {
+		Review firstReview = reviewService.createReview(testReviewDTO.getCreateReviewDTO());
+		int memberPointOfOneReview = pointService.getMemberPoint(testReviewDTO.getMemberId());
+		reviewService.deleteReview(testReviewDTO.getReviewId());
+		int memberPointOfEmptyReview = pointService.getMemberPoint(testReviewDTO.getMemberId());
+
+		assertEquals(memberPointOfOneReview, 3);
+		assertEquals(memberPointOfEmptyReview, 0);
+	}
 }
