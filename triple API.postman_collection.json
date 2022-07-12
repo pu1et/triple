@@ -1,0 +1,142 @@
+{
+	"info": {
+		"_postman_id": "6cb90703-19ea-4a40-9d62-b9c9d51223b2",
+		"name": "triple API",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "20936636"
+	},
+	"item": [
+		{
+			"name": "사용자 생성",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"memberId\" : \"3ede0ef2-92b7-4817-a5f3-0c575361f745\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/member",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"member"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "장소 생성",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"placeId\" : \"2e4baf1c-5acb-4efb-a1af-eddada31b00f\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/place",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"place"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "리뷰 생성",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"type\": \"REVIEW\",\n    \"action\": \"ADD\", \n    \"reviewId\": \"240a0658-dc5f-4878-9381-ebb7b2667772\",\n    \"content\": \"좋아요!\",\n    \"attachedPhotoIds\": [\"e4d1a64e-a531-46de-88d0-ff0ed70c0bb8\", \"afb0cef2-851d-4a50-bb07-9cc15cbdc332\"],\n    \"memberId\": \"3ede0ef2-92b7-4817-a5f3-0c575361f745\",\n    \"placeId\": \"2e4baf1c-5acb-4efb-a1af-eddada31b00f\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/events",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"events"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "사용자 조회(포인트와 함께)",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:8080/member/3ede0ef2-92b7-4817-a5f3-0c575361f745",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"member",
+						"3ede0ef2-92b7-4817-a5f3-0c575361f745"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "리뷰 수정",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"type\": \"REVIEW\",\n    \"action\": \"MOD\", \n    \"reviewId\": \"240a0658-dc5f-4878-9381-ebb7b2667772\",\n    \"content\": \"\",\n    \"attachedPhotoIds\": []\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "http://localhost:8080/events",
+					"protocol": "http",
+					"host": [
+						"localhost"
+					],
+					"port": "8080",
+					"path": [
+						"events"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}
