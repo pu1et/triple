@@ -17,7 +17,7 @@ import java.util.List;
 public class ReviewService {
 	private final ReviewRepository reviewRepository;
 	private final MemberService memberService;
-	private final PlaceService placeService;
+	private final PlaceService placeService;;
 
 	public ReviewService(ReviewRepository reviewRepository, MemberService Service, PlaceService placeService) {
 		this.reviewRepository = reviewRepository;
@@ -32,16 +32,17 @@ public class ReviewService {
 		reviewRepository.findByMemberAndPlace(member, place).ifPresent((review) -> {
 				throw new IllegalStateException("해당 장소에 대한 사용자의 리뷰가 존재합니다.");
 		});
-		Review review = reviewDTO.toReview(member, place);
-		Review savedReview = reviewRepository.save(review);
-		Member updateMember = memberService.updatePoint(member, calculateAllPoint(savedReview));
-		return savedReview;
+		Review review = reviewRepository.save(reviewDTO.toReview(member, place));
+		int point = calculateAllPoint(review);
+		review.setPoint(point);
+		Member updateMember = memberService.updatePoint(member, point);
+		return reviewRepository.save(review);
 	}
 
 	@Transactional
 	public Review updateReview(String reviewId, ReviewDTO.UpdateRequest reviewDTO) {
 		Review review = findReview(reviewId);
-		review.updateReview(reviewDTO.getContent(), PhotoDTO.toPhotos(reviewDTO.getAttachedPhotoIds()));
+		review.updateReview(reviewDTO.getContent(), PhotoDTO.toPhotos(reviewDTO.getAttachedPhotoIds()), calculateAllPoint(review));
 		return reviewRepository.save(review);
 	}
 
@@ -54,7 +55,9 @@ public class ReviewService {
 
 	@Transactional
 	public void deleteReview(String reviewId) {
-		reviewRepository.deleteById(reviewId);
+		Review review = findReview(reviewId);
+		Member member = memberService.updatePoint(review.getMember(), -review.getPoint());
+		reviewRepository.delete(review);
 	}
 
 	public int calculateAllPoint(Review review) {
@@ -63,8 +66,8 @@ public class ReviewService {
 	}
 
 	public int calculateBonusPoint(Review review) {
-		List<Review> allReview = reviewRepository.findAllByPlace(review.getPlace());
-		return (allReview.size() == 1 && allReview.get(0).getMember().equals(review.getMember())) ? 1 : 0;
+		List<Review> allReview = reviewRepository.findAllByPlaceOrderByCreatedAt(review.getPlace());
+		return allReview.get(0).getMember().equals(review.getMember()) ? 1 : 0;
 	}
 
 	public int calculatePoint(String content, List<Photo> photos) {

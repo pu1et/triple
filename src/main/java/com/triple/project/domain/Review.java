@@ -22,20 +22,27 @@ public class Review extends BaseEntity {
 	@OneToMany(fetch = FetchType.LAZY, cascade = CascadeType.ALL, mappedBy = "review")
 	private List<Photo> attachedPhotoIds = new ArrayList<>();
 	@ManyToOne
-	@JoinColumn(name = "member_id", nullable = false)
+	@JoinColumn(name = "member", nullable = false)
 	private Member member;
 	@ManyToOne
-	@JoinColumn(name = "place_id", nullable = false)
+	@JoinColumn(name = "place", nullable = false)
 	private Place place;
+	@Column(name = "point", nullable = false)
+	private int point;
 
 	public void addPhoto(Photo photo) {
 		attachedPhotoIds.add(photo);
 		photo.setReview(this);
 	}
 
-	public void updateReview(String content, List<Photo> attachedPhotoIds) {
+	public void updateReview(String content, List<Photo> attachedPhotoIds, int point) {
 		this.content = content;
 		this.attachedPhotoIds = new ArrayList<>();
 		attachedPhotoIds.forEach(this::addPhoto);
+		this.point = point;
+	}
+
+	public void setPoint(int point) {
+		this.point = point;
 	}
 }
