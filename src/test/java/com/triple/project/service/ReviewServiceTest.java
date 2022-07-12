@@ -1,4 +1,4 @@
-package com.triple.project;
+package com.triple.project.service;
 
 import com.triple.project.domain.Member;
 import com.triple.project.domain.Place;

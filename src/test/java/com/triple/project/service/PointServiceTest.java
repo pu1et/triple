@@ -1,4 +1,4 @@
-package com.triple.project;
+package com.triple.project.service;
 
 import com.triple.project.domain.Member;
 import com.triple.project.domain.Place;
@@ -6,10 +6,6 @@ import com.triple.project.domain.Point;
 import com.triple.project.domain.Review;
 import com.triple.project.dto.MemberDTO;
 import com.triple.project.dto.PlaceDTO;
-import com.triple.project.service.MemberService;
-import com.triple.project.service.PlaceService;
-import com.triple.project.service.PointService;
-import com.triple.project.service.ReviewService;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
