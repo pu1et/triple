@@ -9,14 +9,17 @@ import com.triple.project.dto.PlaceDTO;
 import com.triple.project.dto.ReviewDTO;
 import com.triple.project.service.MemberService;
 import com.triple.project.service.PlaceService;
+import com.triple.project.service.PointService;
 import com.triple.project.service.ReviewService;
 import lombok.Getter;
+import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
@@ -34,6 +37,8 @@ public class ReviewServiceTest {
 	private MemberService memberService;
 	@Autowired
 	private PlaceService placeService;
+	@Autowired
+	private PointService pointService;
 	TestReviewDTO testReviewDTO;
 
 	@BeforeEach
@@ -58,9 +63,9 @@ public class ReviewServiceTest {
 		final String updateContent = "싫어요!";
 		final List<String> updateAttachedPhotoIds = new ArrayList<>();
 		updateAttachedPhotoIds.add(testReviewDTO.photoId2);
-		testReviewDTO.setContent(updateContent);
-		testReviewDTO.setAttachedPhotoIds(updateAttachedPhotoIds);
-		ReviewDTO.UpdateRequest reviewDTO = new ReviewDTO.UpdateRequest(updateContent, updateAttachedPhotoIds);
+		testReviewDTO.content = updateContent;
+		testReviewDTO.attachedPhotoIds.remove(testReviewDTO.attachedPhotoIds.size() - 1);
+		ReviewDTO.UpdateRequest reviewDTO = testReviewDTO.getUpdateReviewDTO();
 
 		Review updateReview = reviewService.updateReview(testReviewDTO.reviewId, reviewDTO);
 
@@ -94,17 +99,20 @@ public class ReviewServiceTest {
 	void getAllPoint() {
 		final String ContentOfLength0 = "";
 		final String ContentOfLength1 = "글";
-		testReviewDTO.setContent(ContentOfLength0);
-		testReviewDTO.setAttachedPhotoIds(new ArrayList<>());
+
+		// 글이 0자이고, 사진도 0개인 경우
+		testReviewDTO.content = ContentOfLength0;
+		testReviewDTO.attachedPhotoIds = new ArrayList<>();
 		int reviewWithZeroLengthAndZeroPhoto = reviewService.calculatePoint(testReviewDTO.content, PhotoDTO.toPhotos(testReviewDTO.attachedPhotoIds));
-		testReviewDTO.setContent(ContentOfLength1);
+		// 글이 1자이고, 사진은 0개인 경우
+		testReviewDTO.content = ContentOfLength1;
 		int reviewWithOneLengthAndZeroPhoto = reviewService.calculatePoint(testReviewDTO.content, PhotoDTO.toPhotos(testReviewDTO.attachedPhotoIds));
-		testReviewDTO.setContent(ContentOfLength0);
-		final List<String> updateAttachedPhotoIds = new ArrayList<>();
-		updateAttachedPhotoIds.add(testReviewDTO.photoId1);
-		testReviewDTO.setAttachedPhotoIds(updateAttachedPhotoIds);
+		// 글이 0자이고, 사진은 1개인 경우
+		testReviewDTO.content = ContentOfLength0;
+		testReviewDTO.attachedPhotoIds.add(testReviewDTO.photoId1);
 		int reviewWithZeroLengthAndOnePhoto = reviewService.calculatePoint(testReviewDTO.content, PhotoDTO.toPhotos(testReviewDTO.attachedPhotoIds));
-		testReviewDTO.setContent(ContentOfLength1);
+		// 글이 1자이고, 사진도 1개인 경우
+		testReviewDTO.content = ContentOfLength1;
 		int reviewWithOneLengthAndOnePhoto = reviewService.calculatePoint(testReviewDTO.content, PhotoDTO.toPhotos(testReviewDTO.attachedPhotoIds));
 
 		assertEquals(reviewWithZeroLengthAndZeroPhoto, 0);
@@ -120,8 +128,8 @@ public class ReviewServiceTest {
 
 		Review firstReview = reviewService.createReview(testReviewDTO.getCreateReviewDTO());
 		int firstReviewPoint = reviewService.calculateBonusPoint(firstReview);
-		testReviewDTO.setReviewId(testReviewDTO.reviewId2);
-		testReviewDTO.setMemberId(testReviewDTO.memberId2);
+		testReviewDTO.reviewId = testReviewDTO.reviewId2;
+		testReviewDTO.memberId = testReviewDTO.memberId2;
 		Review secondReview = reviewService.createReview(testReviewDTO.getCreateReviewDTO());
 		int secondReviewPoint = reviewService.calculateBonusPoint(secondReview);
 
@@ -134,12 +142,25 @@ public class ReviewServiceTest {
 	void deleteScoreIfDeleteReview() {
 		Review firstReview = reviewService.createReview(testReviewDTO.getCreateReviewDTO());
 
-		int pointBeforeDeletedReview = memberService.findMember(testReviewDTO.memberId).getPoint();
+		int pointBeforeDeletedReview = pointService.getUserPoint(testReviewDTO.memberId);
 		reviewService.deleteReview(testReviewDTO.reviewId);
-		int pointAfterDeletedReview = memberService.findMember(testReviewDTO.memberId).getPoint();
+		int pointAfterDeletedReview = pointService.getUserPoint(testReviewDTO.memberId);
 
-		assertEquals(pointBeforeDeletedReview, 3);
-		assertEquals(pointAfterDeletedReview, 0);
+		assertEquals(pointAfterDeletedReview, pointBeforeDeletedReview - 3);
+	}
+
+	@DisplayName("글만 작성한 리뷰에 사진을 추가하면 1점을 부여한다.")
+	@Test
+	void updateScoreIfAddPhoto() {
+		testReviewDTO.attachedPhotoIds.clear();
+		Review firstReview = reviewService.createReview(testReviewDTO.getCreateReviewDTO());
+
+		int pointOfEmptyPhoto = reviewService.findReview(testReviewDTO.reviewId).getPoint();
+		testReviewDTO.attachedPhotoIds.add(testReviewDTO.photoId1);
+		Review review = reviewService.updateReview(testReviewDTO.reviewId, testReviewDTO.getUpdateReviewDTO());
+		int pointOfOnePhoto = reviewService.findReview(testReviewDTO.reviewId).getPoint();
+
+		assertEquals(pointOfOnePhoto, pointOfEmptyPhoto + 1);
 	}
 
 	@Getter
@@ -157,22 +178,6 @@ public class ReviewServiceTest {
 		public TestReviewDTO() {
 			attachedPhotoIds = new ArrayList<>();
 			attachedPhotoIds.add(photoId1);
-		}
-
-		public void setReviewId(String reviewId) {
-			this.reviewId = reviewId;
-		}
-
-		public void setContent(String content) {
-			this.content = content;
-		}
-
-		public void setAttachedPhotoIds(List<String> attachedPhotoIds) {
-			this.attachedPhotoIds = attachedPhotoIds;
-		}
-
-		public void setMemberId(String memberId) {
-			this.memberId = memberId;
 		}
 
 		public ReviewDTO.CreateRequest getCreateReviewDTO() {
