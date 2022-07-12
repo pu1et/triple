@@ -4,12 +4,21 @@ import com.triple.project.domain.Member;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
-@AllArgsConstructor
-@Getter
 public class MemberDTO {
-	private String memberId;
+	@AllArgsConstructor
+	@Getter
+	public static class CreateRequest {
+		private String memberId;
 
-	public Member toMember() {
-		return new Member(memberId);
+		public Member toMember() {
+			return new Member(memberId);
+		}
+	}
+
+	@AllArgsConstructor
+	@Getter
+	public static class GetRequest {
+		private String memberId;
+		private int point;
 	}
 }

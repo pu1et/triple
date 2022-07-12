@@ -9,9 +9,11 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 @Service
 public class MemberService {
-	private MemberRepository memberRepository;
+	private final PointService pointService;
+	private final MemberRepository memberRepository;
 
-	public MemberService(MemberRepository memberRepository) {
+	public MemberService(PointService pointService, MemberRepository memberRepository) {
+		this.pointService = pointService;
 		this.memberRepository = memberRepository;
 	}
 
@@ -23,7 +25,13 @@ public class MemberService {
 	}
 
 	@Transactional
-	public Member saveMember(MemberDTO memberDTO) {
+	public Member saveMember(MemberDTO.CreateRequest memberDTO) {
 		return memberRepository.save(memberDTO.toMember());
+	}
+
+	public MemberDTO.GetRequest getMemberWithPoint(String memberId) {
+		Member member = findMember(memberId);
+		int memberPoint = pointService.getMemberPoint(member);
+		return new MemberDTO.GetRequest(memberId, memberPoint);
 	}
 }
