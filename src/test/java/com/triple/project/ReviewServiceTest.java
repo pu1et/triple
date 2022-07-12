@@ -129,6 +129,19 @@ public class ReviewServiceTest {
 		assertEquals(secondReviewPoint, 0);
 	}
 
+	@DisplayName("리뷰를 작성했다가 삭제하면 해당 리뷰로 부여한 내용 점수와 보너스 점수는 회수한다.")
+	@Test
+	void deleteScoreIfDeleteReview() {
+		Review firstReview = reviewService.createReview(testReviewDTO.getCreateReviewDTO());
+
+		int pointBeforeDeletedReview = memberService.findMember(testReviewDTO.memberId).getPoint();
+		reviewService.deleteReview(testReviewDTO.reviewId);
+		int pointAfterDeletedReview = memberService.findMember(testReviewDTO.memberId).getPoint();
+
+		assertEquals(pointBeforeDeletedReview, 3);
+		assertEquals(pointAfterDeletedReview, 0);
+	}
+
 	@Getter
 	static class TestReviewDTO {
 		private String reviewId = "240a0658-dc5f-4878-9381-ebb7b2667772";
