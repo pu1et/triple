@@ -1,9 +1,6 @@
 package com.triple.project.service;
 
-import com.triple.project.domain.Member;
-import com.triple.project.domain.Photo;
-import com.triple.project.domain.Place;
-import com.triple.project.domain.Review;
+import com.triple.project.domain.*;
 import com.triple.project.dto.PhotoDTO;
 import com.triple.project.dto.ReviewDTO;
 import com.triple.project.repository.ReviewRepository;
@@ -17,12 +14,14 @@ import java.util.List;
 public class ReviewService {
 	private final ReviewRepository reviewRepository;
 	private final MemberService memberService;
-	private final PlaceService placeService;;
+	private final PlaceService placeService;
+	private final PointService pointService;
 
-	public ReviewService(ReviewRepository reviewRepository, MemberService Service, PlaceService placeService) {
+	public ReviewService(ReviewRepository reviewRepository, MemberService Service, PlaceService placeService, PointService pointService) {
 		this.reviewRepository = reviewRepository;
 		this.memberService = Service;
 		this.placeService = placeService;
+		this.pointService = pointService;
 	}
 
 	@Transactional
@@ -33,16 +32,19 @@ public class ReviewService {
 				throw new IllegalStateException("해당 장소에 대한 사용자의 리뷰가 존재합니다.");
 		});
 		Review review = reviewRepository.save(reviewDTO.toReview(member, place));
-		int point = calculateAllPoint(review);
-		review.setPoint(point);
-		Member updateMember = memberService.updatePoint(member, point);
+		int reviewPoint = calculateAllPoint(review);
+		review.updatePoint(reviewPoint);
+		Point point = pointService.addPoint(new PointDTO(reviewPoint, member, review));
 		return reviewRepository.save(review);
 	}
 
 	@Transactional
 	public Review updateReview(String reviewId, ReviewDTO.UpdateRequest reviewDTO) {
 		Review review = findReview(reviewId);
-		review.updateReview(reviewDTO.getContent(), PhotoDTO.toPhotos(reviewDTO.getAttachedPhotoIds()), calculateAllPoint(review));
+		review.updateReview(reviewDTO.getContent(), PhotoDTO.toPhotos(reviewDTO.getAttachedPhotoIds()));
+		int updatePoint = calculateAllPoint(review);
+		review.updatePoint(updatePoint);
+		Point point = pointService.addPoint(new PointDTO(updatePoint - review.getPoint(), review.getMember(), review));
 		return reviewRepository.save(review);
 	}
 
@@ -56,7 +58,7 @@ public class ReviewService {
 	@Transactional
 	public void deleteReview(String reviewId) {
 		Review review = findReview(reviewId);
-		Member member = memberService.updatePoint(review.getMember(), -review.getPoint());
+		Point point = pointService.addPoint(new PointDTO(-review.getPoint(), review.getMember(), review));
 		reviewRepository.delete(review);
 	}
 
@@ -67,6 +69,11 @@ public class ReviewService {
 
 	public int calculateBonusPoint(Review review) {
 		List<Review> allReview = reviewRepository.findAllByPlaceOrderByCreatedAt(review.getPlace());
+		if(allReview.size() > 1) {
+			System.out.println("member.id" + review.getMember().getId());
+			System.out.println(allReview.get(0).getMember().getId() + ", " + allReview.get(0).getCreatedAt());
+			System.out.println(allReview.get(1).getMember().getId() + ", " + allReview.get(0).getCreatedAt());
+		}
 		return allReview.get(0).getMember().equals(review.getMember()) ? 1 : 0;
 	}
 

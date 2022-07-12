@@ -35,14 +35,13 @@ public class Review extends BaseEntity {
 		photo.setReview(this);
 	}
 
-	public void updateReview(String content, List<Photo> attachedPhotoIds, int point) {
+	public void updateReview(String content, List<Photo> attachedPhotoIds) {
 		this.content = content;
 		this.attachedPhotoIds = new ArrayList<>();
 		attachedPhotoIds.forEach(this::addPhoto);
-		this.point = point;
 	}
 
-	public void setPoint(int point) {
+	public void updatePoint(int point) {
 		this.point = point;
 	}
 }

@@ -13,5 +13,5 @@ import java.util.Optional;
 public interface ReviewRepository extends JpaRepository<Review, String> {
 	Optional<Review> findByMemberAndPlace(Member member, Place place);
 
-	List<Review> findAllByPlaceOrderByCreatedAt(Place placeId);
+	List<Review> findAllByPlaceOrderByCreatedAt(Place place);
 }
