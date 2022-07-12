@@ -1,12 +1,7 @@
 package com.triple.project.service;
 
-import com.triple.project.domain.Member;
-import com.triple.project.domain.Place;
-import com.triple.project.domain.Review;
-import com.triple.project.dto.MemberDTO;
-import com.triple.project.dto.PhotoDTO;
-import com.triple.project.dto.PlaceDTO;
-import com.triple.project.dto.ReviewDTO;
+import com.triple.project.domain.*;
+import com.triple.project.dto.*;
 import com.triple.project.service.MemberService;
 import com.triple.project.service.PlaceService;
 import com.triple.project.service.PointService;
@@ -41,8 +36,9 @@ public class ReviewServiceTest {
 	@BeforeEach
 	void beforeEach() {
 		testReviewDTO = new TestReviewDTO();
-		Member member = memberService.saveMember(new MemberDTO(testReviewDTO.memberId));
+		Member member = memberService.saveMember(new MemberDTO.CreateRequest(testReviewDTO.memberId));
 		Place place = placeService.savePlace(new PlaceDTO(testReviewDTO.placeId));
+		testReviewDTO.setMember(member);
 	}
 
 	@DisplayName("리뷰를 작성한다.")
@@ -64,7 +60,7 @@ public class ReviewServiceTest {
 		testReviewDTO.attachedPhotoIds.remove(testReviewDTO.attachedPhotoIds.size() - 1);
 		ReviewDTO.UpdateRequest reviewDTO = testReviewDTO.getUpdateReviewDTO();
 
-		Review updateReview = reviewService.updateReview(testReviewDTO.reviewId, reviewDTO);
+		Review updateReview = reviewService.updateReview(reviewDTO);
 
 		assertTrue(reviewDTO.isEqualReview(updateReview));
 	}
@@ -74,7 +70,7 @@ public class ReviewServiceTest {
 	void deleteReview() {
 		Review createdReview = reviewService.createReview(testReviewDTO.getCreateReviewDTO());
 
-		reviewService.deleteReview(testReviewDTO.reviewId);
+		reviewService.deleteReview(testReviewDTO.getDeleteReviewDTO());
 
 		assertThrows(IllegalStateException.class, () -> {
 			reviewService.findReview(testReviewDTO.reviewId);
@@ -121,7 +117,7 @@ public class ReviewServiceTest {
 	@DisplayName("보상 점수 중 보너스 점수는 특정 장소에 첫 리뷰 작성시 1점이다.")
 	@Test
 	void getBonusPoint() {
-		Member member = memberService.saveMember(new MemberDTO(testReviewDTO.memberId2));
+		Member member = memberService.saveMember(new MemberDTO.CreateRequest(testReviewDTO.memberId2));
 
 		Review firstReview = reviewService.createReview(testReviewDTO.getCreateReviewDTO());
 		int firstReviewPoint = reviewService.calculateBonusPoint(firstReview);
@@ -139,9 +135,9 @@ public class ReviewServiceTest {
 	void deleteScoreIfDeleteReview() {
 		Review firstReview = reviewService.createReview(testReviewDTO.getCreateReviewDTO());
 
-		int pointBeforeDeletedReview = pointService.getMemberPoint(testReviewDTO.memberId);
-		reviewService.deleteReview(testReviewDTO.reviewId);
-		int pointAfterDeletedReview = pointService.getMemberPoint(testReviewDTO.memberId);
+		int pointBeforeDeletedReview = pointService.getMemberPoint(testReviewDTO.member);
+		reviewService.deleteReview(testReviewDTO.getDeleteReviewDTO());
+		int pointAfterDeletedReview = pointService.getMemberPoint(testReviewDTO.member);
 
 		assertEquals(pointAfterDeletedReview, pointBeforeDeletedReview - 3);
 	}
@@ -154,7 +150,7 @@ public class ReviewServiceTest {
 
 		int pointOfEmptyPhoto = reviewService.findReview(testReviewDTO.reviewId).getPoint();
 		testReviewDTO.attachedPhotoIds.add(testReviewDTO.photoId1);
-		Review review = reviewService.updateReview(testReviewDTO.reviewId, testReviewDTO.getUpdateReviewDTO());
+		Review review = reviewService.updateReview(testReviewDTO.getUpdateReviewDTO());
 		int pointOfOnePhoto = reviewService.findReview(testReviewDTO.reviewId).getPoint();
 
 		assertEquals(pointOfOnePhoto, pointOfEmptyPhoto + 1);
@@ -167,7 +163,7 @@ public class ReviewServiceTest {
 
 		int pointOfNotEmptyPhoto = firstReview.getPoint();
 		testReviewDTO.attachedPhotoIds.clear();
-		Review review = reviewService.updateReview(testReviewDTO.reviewId, testReviewDTO.getUpdateReviewDTO());
+		Review review = reviewService.updateReview(testReviewDTO.getUpdateReviewDTO());
 		int pointOfEmptyPhoto = reviewService.findReview(testReviewDTO.reviewId).getPoint();
 
 		assertEquals(pointOfEmptyPhoto, pointOfNotEmptyPhoto - 1);
@@ -178,6 +174,7 @@ public class ReviewServiceTest {
 		private String content = "좋아요!";
 		private List<String> attachedPhotoIds;
 		private String memberId = "3ede0ef2-92b7-4817-a5f3-0c575361f745";
+		private Member member;
 		private final String placeId = "2e4baf1c-5acb-4efb-a1af-eddada31b00f";
 		private final String photoId1 = "e4d1a64e-a531-46de-88d0-ff0ed70c0bb8";
 		private final String photoId2 = "afb0cef2-851d-4a50-bb07-9cc15cbdc332";
@@ -199,7 +196,15 @@ public class ReviewServiceTest {
 		}
 
 		public ReviewDTO.UpdateRequest getUpdateReviewDTO() {
-			return new ReviewDTO.UpdateRequest(content, attachedPhotoIds);
+			return ReviewDTO.UpdateRequest.builder()
+					.reviewId(reviewId)
+					.content(content)
+					.attachedPhotoIds(attachedPhotoIds).build();
+		}
+
+		public ReviewDTO.DeleteRequest getDeleteReviewDTO() {
+			return ReviewDTO.DeleteRequest.builder()
+					.reviewId(reviewId).build();
 		}
 
 		public String getReviewId() {
@@ -216,6 +221,18 @@ public class ReviewServiceTest {
 
 		public String getPlaceId() {
 			return placeId;
+		}
+
+		public Member getMember() {
+			return member;
+		}
+
+		public String getContent() {
+			return content;
+		}
+
+		public void setMember(Member member) {
+			this.member = member;
 		}
 	}
 }
