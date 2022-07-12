@@ -3,8 +3,10 @@ package com.triple.project.dto;
 import com.triple.project.domain.Member;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 public class MemberDTO {
+	@NoArgsConstructor
 	@AllArgsConstructor
 	@Getter
 	public static class CreateRequest {

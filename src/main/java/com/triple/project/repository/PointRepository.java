@@ -15,8 +15,7 @@ public interface PointRepository extends JpaRepository<Point, String> {
 	@Query(value =
 			"SELECT SUM(p.point) " +
 			"FROM Point p " +
-			"GROUP BY p.member " +
-			"HAVING p.member = :member")
+			"WHERE p.member = :member")
 	Integer sumPointGroupByMember(@Param("member") Member member);
 
 	List<Point> findAllByReview(Review review);

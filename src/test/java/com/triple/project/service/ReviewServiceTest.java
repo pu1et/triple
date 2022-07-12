@@ -2,10 +2,6 @@ package com.triple.project.service;
 
 import com.triple.project.domain.*;
 import com.triple.project.dto.*;
-import com.triple.project.service.MemberService;
-import com.triple.project.service.PlaceService;
-import com.triple.project.service.PointService;
-import com.triple.project.service.ReviewService;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -36,8 +32,8 @@ public class ReviewServiceTest {
 	@BeforeEach
 	void beforeEach() {
 		testReviewDTO = new TestReviewDTO();
-		Member member = memberService.saveMember(new MemberDTO.CreateRequest(testReviewDTO.memberId));
-		Place place = placeService.savePlace(new PlaceDTO(testReviewDTO.placeId));
+		Member member = memberService.createMember(new MemberDTO.CreateRequest(testReviewDTO.memberId));
+		Place place = placeService.createPlace(new PlaceDTO(testReviewDTO.placeId));
 		testReviewDTO.setMember(member);
 	}
 
@@ -117,7 +113,7 @@ public class ReviewServiceTest {
 	@DisplayName("보상 점수 중 보너스 점수는 특정 장소에 첫 리뷰 작성시 1점이다.")
 	@Test
 	void getBonusPoint() {
-		Member member = memberService.saveMember(new MemberDTO.CreateRequest(testReviewDTO.memberId2));
+		Member member = memberService.createMember(new MemberDTO.CreateRequest(testReviewDTO.memberId2));
 
 		Review firstReview = reviewService.createReview(testReviewDTO.getCreateReviewDTO());
 		int firstReviewPoint = reviewService.calculateBonusPoint(firstReview);

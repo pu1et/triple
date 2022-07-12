@@ -1,5 +1,6 @@
 package com.triple.project.web;
 
+import com.triple.project.domain.Member;
 import com.triple.project.domain.Review;
 import com.triple.project.dto.EventDTO;
 import com.triple.project.dto.MemberDTO;
@@ -15,6 +16,12 @@ public class MemberController {
 
 	public MemberController(MemberService memberService) {
 		this.memberService = memberService;
+	}
+
+	@PostMapping
+	public ResponseEntity<Member> createMember(@RequestBody MemberDTO.CreateRequest request) {
+		Member member = memberService.createMember(request);
+		return ResponseEntity.ok(member);
 	}
 
 	@GetMapping("/{memberId}")

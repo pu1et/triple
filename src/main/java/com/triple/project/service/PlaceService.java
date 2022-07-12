@@ -23,7 +23,7 @@ public class PlaceService {
 	}
 
 	@Transactional
-	public Place savePlace(PlaceDTO placeDTO) {
+	public Place createPlace(PlaceDTO placeDTO) {
 		return placeRepository.save(placeDTO.toPlace());
 	}
 }

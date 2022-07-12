@@ -33,8 +33,8 @@ public class PointServiceTest {
 	@BeforeEach
 	void beforeEach() {
 		testReviewDTO = new ReviewServiceTest.TestReviewDTO();
-		Member member = memberService.saveMember(new MemberDTO.CreateRequest(testReviewDTO.getMemberId()));
-		Place place = placeService.savePlace(new PlaceDTO(testReviewDTO.getPlaceId()));
+		Member member = memberService.createMember(new MemberDTO.CreateRequest(testReviewDTO.getMemberId()));
+		Place place = placeService.createPlace(new PlaceDTO(testReviewDTO.getPlaceId()));
 		testReviewDTO.setMember(member);
 	}
 

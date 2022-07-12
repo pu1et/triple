@@ -25,7 +25,7 @@ public class MemberService {
 	}
 
 	@Transactional
-	public Member saveMember(MemberDTO.CreateRequest memberDTO) {
+	public Member createMember(MemberDTO.CreateRequest memberDTO) {
 		return memberRepository.save(memberDTO.toMember());
 	}
 

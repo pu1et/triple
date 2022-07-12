@@ -5,7 +5,6 @@ import com.triple.project.domain.*;
 import com.triple.project.dto.EventDTO;
 import com.triple.project.dto.MemberDTO;
 import com.triple.project.dto.PlaceDTO;
-import com.triple.project.dto.ReviewDTO;
 import com.triple.project.service.MemberService;
 import com.triple.project.service.PlaceService;
 import com.triple.project.service.ReviewService;
@@ -45,8 +44,8 @@ public class EventControllerTest {
 	@BeforeEach
 	void beforeEach(WebApplicationContext webApplicationContext) {
 		testReviewDTO = new ReviewServiceTest.TestReviewDTO();
-		Member member = memberService.saveMember(new MemberDTO.CreateRequest(testReviewDTO.getMemberId()));
-		Place place = placeService.savePlace(new PlaceDTO(testReviewDTO.getPlaceId()));
+		Member member = memberService.createMember(new MemberDTO.CreateRequest(testReviewDTO.getMemberId()));
+		Place place = placeService.createPlace(new PlaceDTO(testReviewDTO.getPlaceId()));
 		objectMapper = new ObjectMapper();
 		mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext)
 				.addFilter(new CharacterEncodingFilter("UTF-8", true)).build();

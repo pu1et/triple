@@ -26,6 +26,14 @@ spring:
 ---
 spring:
   profiles: prod
+  jpa:
+    generate-ddl: true
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
   datasource:
     url: jdbc:mysql://localhost:3306/triple?serverTimezone=UTC&characterEncoding=UTF-8
     username: root

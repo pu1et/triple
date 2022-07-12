@@ -10,7 +10,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.test.web.servlet.MockMvc;
@@ -36,7 +35,7 @@ public class MemberControllerTest {
 	@BeforeEach
 	void beforeEach(WebApplicationContext webApplicationContext) {
 		testReviewDTO = new ReviewServiceTest.TestReviewDTO();
-		Member member = memberService.saveMember(new MemberDTO.CreateRequest(testReviewDTO.getMemberId()));
+		Member member = memberService.createMember(new MemberDTO.CreateRequest(testReviewDTO.getMemberId()));
 		mockMvc = MockMvcBuilders.webAppContextSetup(webApplicationContext)
 				.addFilter(new CharacterEncodingFilter("UTF-8", true)).build();
 	}

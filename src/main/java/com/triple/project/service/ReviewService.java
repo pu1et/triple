@@ -44,8 +44,9 @@ public class ReviewService {
 		Review review = findReview(reviewDTO.getReviewId());
 		review.updateReview(reviewDTO.getContent(), PhotoDTO.toPhotos(reviewDTO.getAttachedPhotoIds()));
 		int updatePoint = calculateAllPoint(review);
+		int gapPoint = updatePoint - review.getPoint();
 		review.updatePoint(updatePoint);
-		Point point = pointService.addPoint(new PointDTO(updatePoint - review.getPoint(), review.getMember(), review));
+		Point point = pointService.addPoint(new PointDTO(gapPoint, review.getMember(), review));
 		return reviewRepository.save(review);
 	}
 
