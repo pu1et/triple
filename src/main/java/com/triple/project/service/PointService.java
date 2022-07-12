@@ -12,17 +12,15 @@ import java.util.List;
 @Transactional(readOnly = true)
 @Service
 public class PointService {
-	private final MemberService memberService;
 	private final PointRepository pointRepository;
 
-	public PointService(MemberService memberService, PointRepository pointRepository) {
-		this.memberService = memberService;
+	public PointService(PointRepository pointRepository) {
 		this.pointRepository = pointRepository;
 	}
 
-	public int getMemberPoint(String memberId) {
-		Member member = memberService.findMember(memberId);
-		return pointRepository.sumPointGroupByMember(member);
+	public int getMemberPoint(Member member) {
+		Integer point = pointRepository.sumPointGroupByMember(member);
+		return point == null ? 0 : point;
 	}
 
 	@Transactional

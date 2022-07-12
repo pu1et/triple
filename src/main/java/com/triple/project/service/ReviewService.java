@@ -1,6 +1,7 @@
 package com.triple.project.service;
 
 import com.triple.project.domain.*;
+import com.triple.project.dto.EventDTO;
 import com.triple.project.dto.PhotoDTO;
 import com.triple.project.dto.ReviewDTO;
 import com.triple.project.repository.ReviewRepository;
@@ -39,8 +40,8 @@ public class ReviewService {
 	}
 
 	@Transactional
-	public Review updateReview(String reviewId, ReviewDTO.UpdateRequest reviewDTO) {
-		Review review = findReview(reviewId);
+	public Review updateReview(ReviewDTO.UpdateRequest reviewDTO) {
+		Review review = findReview(reviewDTO.getReviewId());
 		review.updateReview(reviewDTO.getContent(), PhotoDTO.toPhotos(reviewDTO.getAttachedPhotoIds()));
 		int updatePoint = calculateAllPoint(review);
 		review.updatePoint(updatePoint);
@@ -56,8 +57,8 @@ public class ReviewService {
 	}
 
 	@Transactional
-	public void deleteReview(String reviewId) {
-		Review review = findReview(reviewId);
+	public void deleteReview(ReviewDTO.DeleteRequest reviewDTO) {
+		Review review = findReview(reviewDTO.getReviewId());
 		Point point = pointService.addPoint(new PointDTO(-review.getPoint(), review.getMember(), review));
 		reviewRepository.delete(review);
 	}
@@ -69,11 +70,6 @@ public class ReviewService {
 
 	public int calculateBonusPoint(Review review) {
 		List<Review> allReview = reviewRepository.findAllByPlaceOrderByCreatedAt(review.getPlace());
-		if(allReview.size() > 1) {
-			System.out.println("member.id" + review.getMember().getId());
-			System.out.println(allReview.get(0).getMember().getId() + ", " + allReview.get(0).getCreatedAt());
-			System.out.println(allReview.get(1).getMember().getId() + ", " + allReview.get(0).getCreatedAt());
-		}
 		return allReview.get(0).getMember().equals(review.getMember()) ? 1 : 0;
 	}
 
@@ -82,5 +78,19 @@ public class ReviewService {
 		if (content.length() > 0) ++point;
 		if (photos.size() > 0) ++point;
 		return point;
+	}
+
+	@Transactional
+	public Review checkReview(EventDTO eventDTO) {
+		ActionType action = ActionType.from(eventDTO.getAction());
+		if (action == ActionType.ADD) {
+			return createReview(eventDTO.toReviewCreateRequest());
+		} else if (action == ActionType.MOD) {
+			return updateReview(eventDTO.toReviewUpdateRequest());
+		} else if (action == ActionType.DELETE) {
+			deleteReview(eventDTO.toReviewDeleteRequest());
+			return null;
+		}
+		throw new IllegalStateException("action 또는 요청 양식이 잘못되었습니다.");
 	}
 }

@@ -1,18 +1,16 @@
 package com.triple.project.dto;
 
-import com.triple.project.domain.Member;
-import com.triple.project.domain.Photo;
-import com.triple.project.domain.Place;
-import com.triple.project.domain.Review;
+import com.triple.project.domain.*;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 
+import java.io.Serializable;
 import java.util.List;
 
 public class ReviewDTO {
 	@Getter
-	@Builder
-	@AllArgsConstructor
-	public static class CreateRequest {
+	@SuperBuilder
+	public static class CreateRequest extends EventDTO implements Serializable {
 		private String reviewId;
 		protected String content;
 		protected List<String> attachedPhotoIds;
@@ -41,8 +39,9 @@ public class ReviewDTO {
 	}
 
 	@Getter
-	@AllArgsConstructor
-	public static class UpdateRequest {
+	@SuperBuilder
+	public static class UpdateRequest extends EventDTO {
+		private String reviewId;
 		protected String content;
 		protected List<String> attachedPhotoIds;
 
@@ -50,5 +49,11 @@ public class ReviewDTO {
 			return content.equals(review.getContent())
 					&& PhotoDTO.isEqualPhotos(attachedPhotoIds, review.getAttachedPhotoIds());
 		}
+	}
+
+	@Getter
+	@SuperBuilder
+	public static class DeleteRequest extends EventDTO {
+		private String reviewId;
 	}
 }
