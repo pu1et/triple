@@ -33,8 +33,9 @@ public class PointServiceTest {
 	@BeforeEach
 	void beforeEach() {
 		testReviewDTO = new ReviewServiceTest.TestReviewDTO();
-		Member member = memberService.saveMember(new MemberDTO(testReviewDTO.getMemberId()));
+		Member member = memberService.saveMember(new MemberDTO.CreateRequest(testReviewDTO.getMemberId()));
 		Place place = placeService.savePlace(new PlaceDTO(testReviewDTO.getPlaceId()));
+		testReviewDTO.setMember(member);
 	}
 
 	@DisplayName("포인트 증감이 있을 때마다 이력이 남아야 한다.")
@@ -53,9 +54,9 @@ public class PointServiceTest {
 	@Test
 	void getUserPoint() {
 		Review firstReview = reviewService.createReview(testReviewDTO.getCreateReviewDTO());
-		int memberPointOfOneReview = pointService.getMemberPoint(testReviewDTO.getMemberId());
+		int memberPointOfOneReview = pointService.getMemberPoint(testReviewDTO.getMember());
 		reviewService.deleteReview(testReviewDTO.getReviewId());
-		int memberPointOfEmptyReview = pointService.getMemberPoint(testReviewDTO.getMemberId());
+		int memberPointOfEmptyReview = pointService.getMemberPoint(testReviewDTO.getMember());
 
 		assertEquals(memberPointOfOneReview, 3);
 		assertEquals(memberPointOfEmptyReview, 0);
