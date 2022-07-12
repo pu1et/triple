@@ -20,7 +20,7 @@ public class PointService {
 		this.pointRepository = pointRepository;
 	}
 
-	public int getUserPoint(String memberId) {
+	public int getMemberPoint(String memberId) {
 		Member member = memberService.findMember(memberId);
 		return pointRepository.sumPointGroupByMember(member);
 	}
