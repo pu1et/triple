@@ -11,8 +11,10 @@ import com.triple.project.service.MemberService;
 import com.triple.project.service.PlaceService;
 import com.triple.project.service.PointService;
 import com.triple.project.service.ReviewService;
+import lombok.AccessLevel;
 import lombok.Getter;
 import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -176,8 +178,7 @@ public class ReviewServiceTest {
 		assertEquals(pointOfEmptyPhoto, pointOfNotEmptyPhoto - 1);
 	}
 
-	@Getter
-	static class TestReviewDTO {
+	public static class TestReviewDTO {
 		private String reviewId = "240a0658-dc5f-4878-9381-ebb7b2667772";
 		private String content = "좋아요!";
 		private List<String> attachedPhotoIds;
@@ -204,6 +205,22 @@ public class ReviewServiceTest {
 
 		public ReviewDTO.UpdateRequest getUpdateReviewDTO() {
 			return new ReviewDTO.UpdateRequest(content, attachedPhotoIds);
+		}
+
+		public String getReviewId() {
+			return reviewId;
+		}
+
+		public List<String> getAttachedPhotoIds() {
+			return attachedPhotoIds;
+		}
+
+		public String getMemberId() {
+			return memberId;
+		}
+
+		public String getPlaceId() {
+			return placeId;
 		}
 	}
 }
